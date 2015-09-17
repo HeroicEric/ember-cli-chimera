@@ -1,30 +1,11 @@
 import Pretender from 'pretender';
 import Store from './store';
 import Ember from 'ember';
-import DS from 'ember-data';
-
-const { copy } = Ember;
-
-function serializeSingle(object) {
-  let attributes = copy(object, true);
-
-  delete attributes.id;
-
-  return {
-    data: {
-      type: 'users',
-      id: object.id,
-      attributes: attributes
-    }
-  };
-};
 
 class Server {
-  constructor() {
+  constructor(store) {
     this.server = new Pretender;
-    this.store = new Store;
-
-    debugger;
+    this.store = store;
 
     this.headers = { "Content-Type": "application/json" };
   }
@@ -40,7 +21,7 @@ class Server {
   }
 
   respondWith(status, data) {
-    const body = serializeSingle(data);
+    const body = this.store.serialize(data, { includeId: true });
     return [status, this.headers, JSON.stringify(body)];
   }
 }
